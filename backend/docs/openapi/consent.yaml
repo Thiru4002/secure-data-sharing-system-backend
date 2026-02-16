@@ -1,0 +1,89 @@
+tags:
+  - name: Consent
+paths:
+  /api/consent/request:
+    post:
+      tags: [Consent]
+      summary: Request access to data
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [dataId]
+              properties:
+                dataId:
+                  type: string
+                purpose:
+                  type: string
+  /api/consent/my-requests:
+    get:
+      tags: [Consent]
+      summary: Get my access requests (service user)
+      security:
+        - BearerAuth: []
+  /api/consent/approvals:
+    get:
+      tags: [Consent]
+      summary: Get approval requests (data owner)
+      security:
+        - BearerAuth: []
+  /api/consent/{id}/approve:
+    patch:
+      tags: [Consent]
+      summary: Approve consent request
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                expiryDays:
+                  type: number
+  /api/consent/{id}/reject:
+    patch:
+      tags: [Consent]
+      summary: Reject consent request
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+  /api/consent/{id}/revoke:
+    patch:
+      tags: [Consent]
+      summary: Revoke approved consent
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+  /api/consent/access-history:
+    get:
+      tags: [Consent]
+      summary: Get access history for a data item
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: dataId
+          required: true
+          schema:
+            type: string

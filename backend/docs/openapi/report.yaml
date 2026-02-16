@@ -1,0 +1,90 @@
+﻿tags:
+  - name: Reports
+paths:
+  /api/reports:
+    post:
+      tags: [Reports]
+      summary: Submit a user report
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reportedUserId, reason]
+              properties:
+                reportedUserId:
+                  type: string
+                  description: Public userId (USER_...) or Mongo ObjectId
+                category:
+                  type: string
+                  enum: [abuse, spam, fake_identity, policy_violation, other]
+                reason:
+                  type: string
+                details:
+                  type: string
+      responses:
+        '201':
+          description: Report submitted
+  /api/reports/my:
+    get:
+      tags: [Reports]
+      summary: Get reports submitted by current user
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of submitted reports
+  /api/admin/reports:
+    get:
+      tags: [Admin]
+      summary: Get all reports for admin review
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: status
+          schema:
+            type: string
+            enum: [pending, validated, rejected]
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+  /api/admin/reports/{id}/review:
+    patch:
+      tags: [Admin]
+      summary: Review report and optionally suspend reported user
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [validated, rejected]
+                reviewNote:
+                  type: string
+                suspendUser:
+                  type: boolean
+      responses:
+        '200':
+          description: Report reviewed
+

@@ -1,0 +1,114 @@
+tags:
+  - name: Admin
+paths:
+  /api/admin/users:
+    get:
+      tags: [Admin]
+      summary: Get all users
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+        - in: query
+          name: role
+          schema:
+            type: string
+        - in: query
+          name: search
+          schema:
+            type: string
+        - in: query
+          name: includeDeleted
+          schema:
+            type: boolean
+  /api/admin/users/{id}:
+    patch:
+      tags: [Admin]
+      summary: Update user role or active status
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isDeleted:
+                  type: boolean
+  /api/admin/data:
+    get:
+      tags: [Admin]
+      summary: Get all data
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+  /api/admin/consents:
+    get:
+      tags: [Admin]
+      summary: Get all consents
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+        - in: query
+          name: status
+          schema:
+            type: string
+  /api/admin/audit-logs:
+    get:
+      tags: [Admin]
+      summary: Get audit logs
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+        - in: query
+          name: action
+          schema:
+            type: string
+        - in: query
+          name: userId
+          schema:
+            type: string
+  /api/admin/statistics:
+    get:
+      tags: [Admin]
+      summary: Get system statistics
+      security:
+        - BearerAuth: []

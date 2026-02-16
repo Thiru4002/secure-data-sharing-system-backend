@@ -1,0 +1,278 @@
+tags:
+  - name: Data
+paths:
+  /api/data/upload:
+    post:
+      tags: [Data]
+      summary: Upload data (text or file)
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title]
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                content:
+                  type: string
+                file:
+                  type: string
+                  format: binary
+                fileMimeType:
+                  type: string
+                cloudinaryResourceType:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: string
+                ownerReferenceHint:
+                  type: string
+                  description: "e.g., 'Medical Records 2024' or 'Tax Returns FY2024'"
+                ownerIdentifier:
+                  type: string
+                  description: "e.g., 'PATIENT-12345' or 'EMP-789'"
+                allowDownload:
+                  type: boolean
+                  description: "Allow service users to download file content after approval"
+  /api/data/my-data:
+    get:
+      tags: [Data]
+      summary: Get own uploaded data
+      security:
+        - BearerAuth: []
+  /api/data/discover:
+    get:
+      tags: [Data]
+      summary: "Discover data with advanced filtering (SOLVES 'SAME NAME' PROBLEM)"
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: title
+          schema:
+            type: string
+          description: Search by data title
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filter by category
+        - in: query
+          name: tags
+          schema:
+            type: string
+          description: "Filter by tags (comma-separated)"
+        - in: query
+          name: search
+          schema:
+            type: string
+          description: Full-text search
+        - in: query
+          name: ownerUserId
+          schema:
+            type: string
+          description: "Find data by owner's User ID (e.g., USER_1234_ABCD)"
+        - in: query
+          name: ownerUuid
+          schema:
+            type: string
+          description: "Find data by owner's UUID (globally unique)"
+        - in: query
+          name: ownerEmail
+          schema:
+            type: string
+          description: "Find data by owner's email"
+        - in: query
+          name: ownerPhone
+          schema:
+            type: string
+          description: "Find data by owner's phone number"
+        - in: query
+          name: ownerName
+          schema:
+            type: string
+          description: "Find data by owner's name (partial match allowed)"
+        - in: query
+          name: page
+          schema:
+            type: number
+        - in: query
+          name: limit
+          schema:
+            type: number
+      responses:
+        '200':
+          description: "List of discoverable data with owner identification info"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id:
+                          type: string
+                        title:
+                          type: string
+                        description:
+                          type: string
+                        category:
+                          type: string
+                        tags:
+                          type: array
+                        owner:
+                          type: object
+                          properties:
+                            userId:
+                              type: string
+                              description: "Unique User ID (e.g., USER_1234_ABCD)"
+                            uuid:
+                              type: string
+                              description: "System-wide unique identifier"
+                            name:
+                              type: string
+                            email:
+                              type: string
+                            phone:
+                              type: string
+                            referenceDescription:
+                              type: string
+                              description: "e.g., 'Engineer at TechCorp'"
+                        ownerReferenceHint:
+                          type: string
+                          description: "What the owner said about this data"
+                        ownerIdentifier:
+                          type: string
+                          description: "Owner's identifier (e.g., PATIENT-789)"
+  /api/data/user-identification:
+    get:
+      tags: [Data]
+      summary: "Look up user identification details (helps find exact person)"
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: string
+          description: "Search by User ID (e.g., USER_1234_ABCD)"
+        - in: query
+          name: uuid
+          schema:
+            type: string
+          description: "Search by UUID"
+        - in: query
+          name: email
+          schema:
+            type: string
+          description: "Search by email"
+      responses:
+        '200':
+          description: "User identification details"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                        uuid:
+                          type: string
+                        name:
+                          type: string
+                        email:
+                          type: string
+                        phone:
+                          type: string
+                        referenceDescription:
+                          type: string
+  /api/data/{id}/download:
+    get:
+      tags: [Data]
+      summary: Download data content (file or text)
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Downloaded file stream
+  /api/data/{id}:
+    get:
+      tags: [Data]
+      summary: "Get data by ID (owner or approved user only)"
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+    patch:
+      tags: [Data]
+      summary: Update data metadata (including reference hint and identifier)
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                category:
+                  type: string
+                tags:
+                  type: string
+                ownerReferenceHint:
+                  type: string
+                ownerIdentifier:
+                  type: string
+                allowDownload:
+                  type: boolean
+    delete:
+      tags: [Data]
+      summary: Delete data
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+

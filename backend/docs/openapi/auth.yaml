@@ -1,0 +1,135 @@
+﻿tags:
+  - name: Auth
+paths:
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password, phone]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: [data_owner, service_user, admin]
+                phone:
+                  type: string
+                referenceDescription:
+                  type: string
+      responses:
+        '201':
+          description: User registered
+
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful, returns JWT token
+
+  /api/auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request password reset OTP (demo)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone]
+              properties:
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: OTP generated
+
+  /api/auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Reset password using OTP (demo)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [phone, otp, newPassword]
+              properties:
+                phone:
+                  type: string
+                otp:
+                  type: string
+                newPassword:
+                  type: string
+      responses:
+        '200':
+          description: Password reset successful
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get current user
+      security:
+        - BearerAuth: []
+
+  /api/auth/profile:
+    patch:
+      tags: [Auth]
+      summary: Update profile
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                phone:
+                  type: string
+                referenceDescription:
+                  type: string
+      responses:
+        '200':
+          description: Profile updated
+
+  /api/auth/delete:
+    delete:
+      tags: [Auth]
+      summary: Delete account
+      security:
+        - BearerAuth: []
+
+  /api/auth/cancel-deletion:
+    patch:
+      tags: [Auth]
+      summary: Cancel scheduled account deletion
+      security:
+        - BearerAuth: []
