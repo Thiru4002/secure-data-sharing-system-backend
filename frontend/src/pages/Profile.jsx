@@ -74,7 +74,12 @@ export default function Profile() {
   };
 
   const handleChange = (event) => {
-    setForm({ ...form, [event.target.name]: event.target.value });
+    const { name, value } = event.target;
+    if (name === 'phone') {
+      setForm({ ...form, phone: value.replace(/\\D/g, '').slice(0, 10) });
+      return;
+    }
+    setForm({ ...form, [name]: value });
   };
 
   if (loading) {
@@ -111,7 +116,15 @@ export default function Profile() {
             </div>
             <div className="form-group">
               <label>Phone</label>
-              <input name="phone" value={form.phone} onChange={handleChange} />
+              <input
+                name="phone"
+                value={form.phone}
+                onChange={handleChange}
+                inputMode="numeric"
+                autoComplete="tel"
+                pattern="[0-9]{10}"
+                maxLength={10}
+              />
             </div>
             <div className="form-group">
               <label>Reference description</label>

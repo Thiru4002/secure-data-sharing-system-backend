@@ -5,9 +5,13 @@ export default function ConsentHistory() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [expanded, setExpanded] = useState({});
   const [histories, setHistories] = useState({});
   const [historyLoading, setHistoryLoading] = useState({});
+  const [actionLoadingById, setActionLoadingById] = useState({});
+  const [actionMessageById, setActionMessageById] = useState({});
+  const [actionErrorById, setActionErrorById] = useState({});
 
   const loadData = () => {
     setLoading(true);
@@ -21,6 +25,18 @@ export default function ConsentHistory() {
   useEffect(() => {
     loadData();
   }, []);
+
+  useEffect(() => {
+    if (!message) return undefined;
+    const timer = setTimeout(() => setMessage(''), 3500);
+    return () => clearTimeout(timer);
+  }, [message]);
+
+  useEffect(() => {
+    if (Object.keys(actionMessageById).length === 0) return undefined;
+    const timer = setTimeout(() => setActionMessageById({}), 3000);
+    return () => clearTimeout(timer);
+  }, [actionMessageById]);
 
   const toggleHistory = async (dataId) => {
     const next = !expanded[dataId];
@@ -52,10 +68,21 @@ export default function ConsentHistory() {
   const revokeConsent = async (consentId, dataId) => {
     if (!window.confirm('Revoke this consent?')) return;
     try {
+      setMessage('');
+      setError('');
+      setActionMessageById((prev) => ({ ...prev, [consentId]: '' }));
+      setActionErrorById((prev) => ({ ...prev, [consentId]: '' }));
+      setActionLoadingById((prev) => ({ ...prev, [consentId]: true }));
       await api.patch(`/consent/${consentId}/revoke`);
+      setMessage('Consent revoked successfully.');
+      setActionMessageById((prev) => ({ ...prev, [consentId]: 'Revoked.' }));
       await fetchHistory(dataId);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to revoke consent');
+      const msg = err.response?.data?.message || 'Failed to revoke consent';
+      setError(msg);
+      setActionErrorById((prev) => ({ ...prev, [consentId]: msg }));
+    } finally {
+      setActionLoadingById((prev) => ({ ...prev, [consentId]: false }));
     }
   };
 
@@ -67,10 +94,10 @@ export default function ConsentHistory() {
       </div>
 
       <div className="card">
+        {message && <div className="alert alert-success">{message}</div>}
+        {error && <div className="alert alert-error">{error}</div>}
         {loading ? (
           <p>Loading data...</p>
-        ) : error ? (
-          <div className="alert alert-error">{error}</div>
         ) : items.length === 0 ? (
           <p>No data uploaded yet.</p>
         ) : (
@@ -132,11 +159,22 @@ export default function ConsentHistory() {
                                       <button
                                         className="btn btn-danger"
                                         onClick={() => revokeConsent(entry._id, item._id)}
+                                        disabled={actionLoadingById[entry._id]}
                                       >
-                                        Revoke
+                                        {actionLoadingById[entry._id] ? 'Working...' : 'Revoke'}
                                       </button>
                                     ) : (
                                       '-'
+                                    )}
+                                    {actionMessageById[entry._id] && (
+                                      <div className="alert alert-success" style={{ marginTop: 10 }}>
+                                        {actionMessageById[entry._id]}
+                                      </div>
+                                    )}
+                                    {actionErrorById[entry._id] && (
+                                      <div className="alert alert-error" style={{ marginTop: 10 }}>
+                                        {actionErrorById[entry._id]}
+                                      </div>
                                     )}
                                   </td>
                                 </tr>

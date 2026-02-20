@@ -20,6 +20,7 @@ export default function DiscoverData() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [message, setMessage] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [requestsByData, setRequestsByData] = useState({});
   const [recentSearches, setRecentSearches] = useState([]);
@@ -27,6 +28,9 @@ export default function DiscoverData() {
   const [hasSearched, setHasSearched] = useState(false);
   const [purposeById, setPurposeById] = useState({});
   const [customPurposeById, setCustomPurposeById] = useState({});
+  const [requestLoadingById, setRequestLoadingById] = useState({});
+  const [requestMessageById, setRequestMessageById] = useState({});
+  const [requestErrorById, setRequestErrorById] = useState({});
   const navigate = useNavigate();
   const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
   const canRequest = currentUser?.role === 'service_user';
@@ -86,6 +90,7 @@ export default function DiscoverData() {
     event.preventDefault();
     setLoading(true);
     setError('');
+    setMessage('');
     setHasSearched(true);
 
     try {
@@ -109,6 +114,7 @@ export default function DiscoverData() {
     if (!userId) return;
     setLoading(true);
     setError('');
+    setMessage('');
     setHasSearched(true);
     try {
       const params = new URLSearchParams();
@@ -125,15 +131,25 @@ export default function DiscoverData() {
 
   const requestAccess = async (dataId) => {
     try {
+      setMessage('');
+      setError('');
+      setRequestMessageById((prev) => ({ ...prev, [dataId]: '' }));
+      setRequestErrorById((prev) => ({ ...prev, [dataId]: '' }));
+      setRequestLoadingById((prev) => ({ ...prev, [dataId]: true }));
       const selectedPurpose = purposeById[dataId] || 'Project review';
       const finalPurpose = selectedPurpose === 'Other'
         ? (customPurposeById[dataId] || 'Other')
         : selectedPurpose;
       await api.post('/consent/request', { dataId, purpose: finalPurpose });
-      alert('Access request sent');
+      setMessage('Access request sent successfully.');
+      setRequestMessageById((prev) => ({ ...prev, [dataId]: 'Request sent.' }));
       await loadMyRequests();
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to request access');
+      const msg = err.response?.data?.message || 'Failed to request access';
+      setError(msg);
+      setRequestErrorById((prev) => ({ ...prev, [dataId]: msg }));
+    } finally {
+      setRequestLoadingById((prev) => ({ ...prev, [dataId]: false }));
     }
   };
 
@@ -151,6 +167,18 @@ export default function DiscoverData() {
     loadRecentSearches();
   }, []);
 
+  useEffect(() => {
+    if (!message) return undefined;
+    const timer = setTimeout(() => setMessage(''), 3500);
+    return () => clearTimeout(timer);
+  }, [message]);
+
+  useEffect(() => {
+    if (Object.keys(requestMessageById).length === 0) return undefined;
+    const timer = setTimeout(() => setRequestMessageById({}), 3000);
+    return () => clearTimeout(timer);
+  }, [requestMessageById]);
+
   return (
     <div className="grid" style={{ gap: 24 }}>
       <div className="card">
@@ -159,6 +187,7 @@ export default function DiscoverData() {
       </div>
       <div className="card">
         {error && <div className="alert alert-error">{error}</div>}
+        {message && <div className="alert alert-success">{message}</div>}
         <form className="form" onSubmit={handleSearch}>
           <div className="form-group">
             <label>Owner user ID</label>
@@ -286,8 +315,16 @@ export default function DiscoverData() {
                       View details
                     </button>
                     {canRequest && (
-                      <button className="btn btn-primary" onClick={() => requestAccess(item._id)}>
-                        {req ? 'Request again' : 'Request access'}
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => requestAccess(item._id)}
+                        disabled={requestLoadingById[item._id]}
+                      >
+                        {requestLoadingById[item._id]
+                          ? 'Requesting...'
+                          : req
+                            ? 'Request again'
+                            : 'Request access'}
                       </button>
                     )}
                     {item.owner?.id && (
@@ -299,6 +336,16 @@ export default function DiscoverData() {
                       </button>
                     )}
                   </div>
+                  {requestMessageById[item._id] && (
+                    <div className="alert alert-success" style={{ marginTop: 10 }}>
+                      {requestMessageById[item._id]}
+                    </div>
+                  )}
+                  {requestErrorById[item._id] && (
+                    <div className="alert alert-error" style={{ marginTop: 10 }}>
+                      {requestErrorById[item._id]}
+                    </div>
+                  )}
                 </div>
               );
             })}

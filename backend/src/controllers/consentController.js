@@ -1,6 +1,12 @@
 const Consent = require('../models/Consent');
 const Data = require('../models/Data');
 const { success, error } = require('../utils/response');
+const {
+  notifyConsentRequested,
+  notifyConsentApproved,
+  notifyConsentRejected,
+  notifyConsentRevoked,
+} = require('../utils/notification');
 
 exports.requestAccess = async (req, res) => {
   try {
@@ -48,6 +54,13 @@ exports.requestAccess = async (req, res) => {
 
     await consent.save();
     await consent.populate(['data', 'serviceUser', 'dataOwner']);
+
+    await notifyConsentRequested({
+      dataOwner: consent.dataOwner,
+      serviceUser: consent.serviceUser,
+      data: consent.data,
+      purpose: consent.purpose,
+    });
 
     success(res, 201, consent, 'Access request sent');
   } catch (err) {
@@ -115,6 +128,12 @@ exports.approveConsent = async (req, res) => {
     await consent.save();
     await consent.populate(['data', 'serviceUser']);
 
+    await notifyConsentApproved({
+      serviceUser: consent.serviceUser,
+      data: consent.data,
+      expiryDate: consent.expiryDate,
+    });
+
     success(res, 200, consent, 'Consent approved');
   } catch (err) {
     error(res, 500, err.message);
@@ -141,6 +160,11 @@ exports.rejectConsent = async (req, res) => {
     consent.status = 'rejected';
     await consent.save();
     await consent.populate(['data', 'serviceUser']);
+
+    await notifyConsentRejected({
+      serviceUser: consent.serviceUser,
+      data: consent.data,
+    });
 
     success(res, 200, consent, 'Consent rejected');
   } catch (err) {
@@ -169,6 +193,11 @@ exports.revokeConsent = async (req, res) => {
     consent.revokedAt = new Date();
     await consent.save();
     await consent.populate(['data', 'serviceUser']);
+
+    await notifyConsentRevoked({
+      serviceUser: consent.serviceUser,
+      data: consent.data,
+    });
 
     success(res, 200, consent, 'Consent revoked');
   } catch (err) {

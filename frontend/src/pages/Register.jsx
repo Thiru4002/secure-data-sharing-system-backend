@@ -16,7 +16,13 @@ export default function Register({ setUser }) {
   const navigate = useNavigate();
 
   const handleChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
+    const { name, value } = event.target;
+    if (name === 'phone') {
+      const digits = value.replace(/\D/g, '').slice(0, 10);
+      setFormData({ ...formData, phone: digits });
+      return;
+    }
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSubmit = async (event) => {
@@ -25,6 +31,11 @@ export default function Register({ setUser }) {
     setLoading(true);
 
     try {
+      if (formData.phone.length !== 10) {
+        setError('Phone number must be exactly 10 digits');
+        setLoading(false);
+        return;
+      }
       await api.post('/auth/register', {
         name: formData.name,
         email: formData.email,
@@ -98,7 +109,11 @@ export default function Register({ setUser }) {
                 value={formData.phone}
                 onChange={handleChange}
                 required
-                placeholder="e.g., +1 555 555 5555"
+                inputMode="numeric"
+                autoComplete="tel"
+                pattern="[0-9]{10}"
+                maxLength={10}
+                placeholder="10-digit phone number"
               />
             </div>
             <div className="form-group">

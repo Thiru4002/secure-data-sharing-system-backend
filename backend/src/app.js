@@ -3,6 +3,10 @@ const cors = require('cors');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+  console.warn('[warn] EMAIL_USER or EMAIL_PASS is not set. Email notifications will be disabled.');
+}
+
 // Import routes
 const authRoutes = require('./routes/authRoutes');
 const dataRoutes = require('./routes/dataRoutes');

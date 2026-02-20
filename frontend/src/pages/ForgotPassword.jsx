@@ -67,8 +67,14 @@ export default function ForgotPassword() {
                 <label>Phone number</label>
                 <input
                   value={phone}
-                  onChange={(event) => setPhone(event.target.value)}
-                  placeholder="e.g., +1 555 555 5555"
+                  onChange={(event) =>
+                    setPhone(event.target.value.replace(/\D/g, '').slice(0, 10))
+                  }
+                  placeholder="10-digit phone number"
+                  inputMode="numeric"
+                  autoComplete="tel"
+                  pattern="[0-9]{10}"
+                  maxLength={10}
                   required
                 />
               </div>

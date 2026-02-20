@@ -3,6 +3,7 @@ const { generateToken } = require('../middlewares/auth');
 const { success, error, loginSuccess } = require('../utils/response');
 
 const normalizePhone = (value) => (value || '').toString().replace(/\D/g, '');
+const isValidTenDigitPhone = (value) => /^\d{10}$/.test(value);
 
 exports.register = async (req, res) => {
   try {
@@ -21,13 +22,16 @@ exports.register = async (req, res) => {
 
     // Create user (email verification removed)
     const normalizedPhone = normalizePhone(phone);
+    if (!isValidTenDigitPhone(normalizedPhone)) {
+      return error(res, 400, 'Phone number must be exactly 10 digits');
+    }
     const user = new User({
       name,
       email,
       password,
       role: role || 'service_user',
-      phone,
-      phoneNormalized: normalizedPhone || null,
+      phone: normalizedPhone,
+      phoneNormalized: normalizedPhone,
       referenceDescription: referenceDescription || null, // OPTIONAL
       isEmailVerified: true,
     });
@@ -55,8 +59,11 @@ exports.forgotPassword = async (req, res) => {
     }
 
     const normalizedPhone = normalizePhone(phone);
+    if (!isValidTenDigitPhone(normalizedPhone)) {
+      return error(res, 400, 'Phone number must be exactly 10 digits');
+    }
     const user = await User.findOne({
-      $or: [{ phone }, { phoneNormalized: normalizedPhone }],
+      $or: [{ phone: normalizedPhone }, { phoneNormalized: normalizedPhone }],
     }).select('+resetOtp +resetOtpExpires');
     if (!user) {
       return error(res, 404, 'No account found with that phone number');
@@ -89,8 +96,11 @@ exports.resetPassword = async (req, res) => {
     }
 
     const normalizedPhone = normalizePhone(phone);
+    if (!isValidTenDigitPhone(normalizedPhone)) {
+      return error(res, 400, 'Phone number must be exactly 10 digits');
+    }
     const user = await User.findOne({
-      $or: [{ phone }, { phoneNormalized: normalizedPhone }],
+      $or: [{ phone: normalizedPhone }, { phoneNormalized: normalizedPhone }],
     }).select('+resetOtp +resetOtpExpires +password');
     if (!user || !user.resetOtp || !user.resetOtpExpires) {
       return error(res, 400, 'OTP not requested');
@@ -181,8 +191,12 @@ exports.updateProfile = async (req, res) => {
 
     if (name) updates.name = name;
     if (phone) {
-      updates.phone = phone;
-      updates.phoneNormalized = normalizePhone(phone);
+      const normalizedPhone = normalizePhone(phone);
+      if (!isValidTenDigitPhone(normalizedPhone)) {
+        return error(res, 400, 'Phone number must be exactly 10 digits');
+      }
+      updates.phone = normalizedPhone;
+      updates.phoneNormalized = normalizedPhone;
     }
     if (referenceDescription !== undefined) {
       updates.referenceDescription = referenceDescription;
