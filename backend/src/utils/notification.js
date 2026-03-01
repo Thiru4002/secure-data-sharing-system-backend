@@ -83,9 +83,74 @@ const notifyConsentRevoked = async ({ serviceUser, data }) => {
   }
 };
 
+const notifyDataRequestCreated = async ({ owner, requester, request }) => {
+  try {
+    if (!owner?.email) return false;
+    const title = request?.requestedTitle ? ` (${request.requestedTitle})` : '';
+    const category = request?.requestedCategory ? `Category: ${request.requestedCategory}` : null;
+    await sendEmail({
+      to: owner.email,
+      subject: 'New Data Request',
+      html: `
+        <p>Hello ${owner.name || 'there'},</p>
+        <p>${requester?.name || 'A service user'} has requested data${title}.</p>
+        ${category ? `<p><strong>${category}</strong></p>` : ''}
+        <p><strong>Message:</strong> ${request?.message || 'No message provided.'}</p>
+        <p>Please review the request in your dashboard.</p>
+      `,
+    });
+    return true;
+  } catch (err) {
+    console.error(`[notify] Data request email failed: ${err.message}`);
+    return false;
+  }
+};
+
+const notifyDataRequestRejected = async ({ requester, owner, request }) => {
+  try {
+    if (!requester?.email) return false;
+    const title = request?.requestedTitle ? ` (${request.requestedTitle})` : '';
+    await sendEmail({
+      to: requester.email,
+      subject: 'Data Request Rejected',
+      html: `
+        <p>Hello ${requester.name || 'there'},</p>
+        <p>Your data request${title} has been rejected by ${owner?.name || 'the data owner'}.</p>
+      `,
+    });
+    return true;
+  } catch (err) {
+    console.error(`[notify] Data request rejection email failed: ${err.message}`);
+    return false;
+  }
+};
+
+const notifyDataRequestFulfilled = async ({ requester, owner, data }) => {
+  try {
+    if (!requester?.email) return false;
+    const title = data?.title ? ` "${data.title}"` : '';
+    await sendEmail({
+      to: requester.email,
+      subject: 'Data Request Fulfilled',
+      html: `
+        <p>Hello ${requester.name || 'there'},</p>
+        <p>Your data request has been fulfilled by ${owner?.name || 'the data owner'}.</p>
+        <p>You now have approved access to${title}.</p>
+      `,
+    });
+    return true;
+  } catch (err) {
+    console.error(`[notify] Data request fulfillment email failed: ${err.message}`);
+    return false;
+  }
+};
+
 module.exports = {
   notifyConsentRequested,
   notifyConsentApproved,
   notifyConsentRejected,
   notifyConsentRevoked,
+  notifyDataRequestCreated,
+  notifyDataRequestRejected,
+  notifyDataRequestFulfilled,
 };

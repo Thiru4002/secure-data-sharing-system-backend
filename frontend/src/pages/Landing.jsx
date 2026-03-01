@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+ï»¿import { Link } from 'react-router-dom';
 
 export default function Landing() {
   return (
@@ -14,7 +14,7 @@ export default function Landing() {
           <Link className="btn btn-primary" to="/register">
             Create account
           </Link>
-          <Link className="btn btn-ghost" to="/login">
+          <Link className="btn btn-secondary" to="/login">
             Sign in
           </Link>
         </div>
@@ -31,7 +31,7 @@ export default function Landing() {
         <div className="feature-card">
           <h3>Identity clarity</h3>
           <p>
-            Match the right person with UUIDs, user IDs, and reference hints. No more “same name” mixups.
+            Match the right person with UUIDs, user IDs, and reference hints. No more "same name" mixups.
           </p>
         </div>
         <div className="feature-card">
@@ -58,7 +58,7 @@ export default function Landing() {
       </section>
 
       <footer className="footer">
-        <span>ClarityVault · Secure Data Sharing System</span>
+        <span>ClarityVault Â· Secure Data Sharing System</span>
         <span>Built for academic projects and real-world workflows</span>
       </footer>
     </div>

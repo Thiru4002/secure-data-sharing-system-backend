@@ -132,11 +132,18 @@ export default function Reports() {
                 <tr key={r._id}>
                   <td>{r.reportedUser?.userId || r.reportedUser?._id || 'Unknown'}</td>
                   <td>{r.category}</td>
-                  <td>{r.status}</td>
+                  <td><span className={`status-pill ${r.status}`}>{r.status}</span></td>
                   <td>{r.reason}</td>
                   <td>{new Date(r.createdAt).toLocaleString()}</td>
                 </tr>
               ))}
+              {myReports.length === 0 && (
+                <tr>
+                  <td colSpan={5}>
+                    <div className="empty-state">No reports submitted yet.</div>
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>

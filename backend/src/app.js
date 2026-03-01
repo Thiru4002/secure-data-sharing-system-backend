@@ -13,6 +13,8 @@ const dataRoutes = require('./routes/dataRoutes');
 const consentRoutes = require('./routes/consentRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const reportRoutes = require('./routes/reportRoutes');
+const discoveryRoutes = require('./routes/discoveryRoutes');
+const dataRequestRoutes = require('./routes/dataRequestRoutes');
 
 // Import middlewares
 const { logAction } = require('./middlewares/audit');
@@ -72,6 +74,8 @@ app.use('/api/data', dataRoutes);
 app.use('/api/consent', consentRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/discovery', discoveryRoutes);
+app.use('/api/data-requests', dataRequestRoutes);
 
 // 404 handler
 app.use((req, res) => {

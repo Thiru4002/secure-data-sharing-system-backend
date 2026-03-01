@@ -1,5 +1,5 @@
-﻿import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 const TABS = ['pending', 'approved', 'rejected', 'revoked'];
@@ -13,11 +13,19 @@ const getFilenameFromDisposition = (disposition) => {
 };
 
 export default function ApprovedData() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState([]);
-  const [activeTab, setActiveTab] = useState('approved');
+  const [activeTab, setActiveTab] = useState(searchParams.get('status') || 'approved');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const queryStatus = searchParams.get('status');
+    if (queryStatus && TABS.includes(queryStatus)) {
+      setActiveTab(queryStatus);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     api
@@ -30,7 +38,17 @@ export default function ApprovedData() {
       .finally(() => setLoading(false));
   }, []);
 
-  const filtered = useMemo(() => items.filter((item) => item.status === activeTab), [items, activeTab]);
+  const filtered = useMemo(
+    () => items.filter((item) => item.status === activeTab),
+    [items, activeTab]
+  );
+
+  const setTab = (tab) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('status', tab);
+    setSearchParams(next);
+    setActiveTab(tab);
+  };
 
   const downloadIfAllowed = async (dataId, fallbackName) => {
     try {
@@ -79,7 +97,7 @@ export default function ApprovedData() {
             <button
               key={tab}
               className={tab === activeTab ? 'btn btn-primary' : 'btn btn-secondary'}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setTab(tab)}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
@@ -90,7 +108,7 @@ export default function ApprovedData() {
         ) : error ? (
           <div className="alert alert-error">{error}</div>
         ) : filtered.length === 0 ? (
-          <p>No {activeTab} requests yet.</p>
+          <div className="empty-state">No {activeTab} requests for this filter.</div>
         ) : (
           <div className="table-wrap">
             <table className="table">
@@ -130,7 +148,7 @@ export default function ApprovedData() {
                             </button>
                           </div>
                         ) : (
-                          <span className="tag">{renderStatus(item.status)}</span>
+                          <span className={`status-pill ${item.status}`}>{renderStatus(item.status)}</span>
                         )}
                       </td>
                     </tr>

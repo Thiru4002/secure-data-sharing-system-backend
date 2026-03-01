@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 export default function UploadData() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -17,6 +20,12 @@ export default function UploadData() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const returnTo = useMemo(() => {
+    const params = new URLSearchParams(location.search);
+    const target = params.get('returnTo');
+    return target && target.startsWith('/') ? target : '';
+  }, [location.search]);
 
   const handleChange = (event) => {
     const { name, value, files, type, checked } = event.target;
@@ -60,6 +69,12 @@ export default function UploadData() {
         allowDownload: false,
       });
       setShowAdvanced(false);
+
+      if (returnTo) {
+        setTimeout(() => {
+          navigate(returnTo);
+        }, 700);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Upload failed');
     } finally {
@@ -77,6 +92,9 @@ export default function UploadData() {
       <div className="card">
         {loading && <div className="alert alert-info">Uploading... please wait.</div>}
         {message && <div className="alert alert-success">{message}</div>}
+        {returnTo && message && (
+          <div className="alert alert-info">Returning to pending requests...</div>
+        )}
         {error && <div className="alert alert-error">{error}</div>}
         <form className="form" onSubmit={handleSubmit}>
           <div className="form-group">
@@ -97,7 +115,7 @@ export default function UploadData() {
             {formData.file && (
               <div style={{ marginTop: 8 }}>
                 <p style={{ color: '#5b6475', fontSize: 13, margin: 0 }}>
-                  Selected: {formData.file.name} ({Math.round(formData.file.size / 1024)} KB) · {formData.file.type || 'unknown type'}
+                  Selected: {formData.file.name} ({Math.round(formData.file.size / 1024)} KB) - {formData.file.type || 'unknown type'}
                 </p>
                 <p style={{ color: '#5b6475', fontSize: 13, margin: '4px 0 0' }}>
                   Cloud delivery: {formData.file.type?.startsWith('image/') ? 'image' : 'raw'}
@@ -106,7 +124,7 @@ export default function UploadData() {
             )}
           </div>
           <div className="form-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 name="allowDownload"
@@ -167,4 +185,3 @@ export default function UploadData() {
     </div>
   );
 }
-

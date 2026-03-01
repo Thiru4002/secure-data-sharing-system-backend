@@ -1,4 +1,5 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 const CONSENT_TABS = ['all', 'pending', 'approved', 'rejected', 'revoked'];
@@ -12,6 +13,7 @@ const DEFAULT_SECTIONS = {
 };
 
 export default function AdminPanel() {
+  const [searchParams] = useSearchParams();
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [data, setData] = useState([]);
@@ -90,6 +92,16 @@ export default function AdminPanel() {
   useEffect(() => {
     localStorage.setItem(ADMIN_SECTIONS_KEY, JSON.stringify(sectionOpen));
   }, [sectionOpen]);
+
+  useEffect(() => {
+    const section = searchParams.get('section');
+    if (!section) return;
+    if (section === 'users') setSectionOpen((prev) => ({ ...prev, userManagement: true }));
+    if (section === 'consents') setSectionOpen((prev) => ({ ...prev, consentMonitor: true }));
+    if (section === 'data') setSectionOpen((prev) => ({ ...prev, recentData: true }));
+    if (section === 'audit') setSectionOpen((prev) => ({ ...prev, auditLog: true }));
+    if (section === 'reports') setSectionOpen((prev) => ({ ...prev, reportsReview: true }));
+  }, [searchParams]);
 
   const toggleSection = (key) => {
     setSectionOpen((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -373,3 +385,4 @@ export default function AdminPanel() {
     </div>
   );
 }
+

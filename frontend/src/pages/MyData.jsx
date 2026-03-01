@@ -106,8 +106,15 @@ export default function MyData() {
   return (
     <div className="grid" style={{ gap: 24 }}>
       <div className="card">
-        <h2 className="section-title">My uploaded data</h2>
-        <p>Manage the data you have shared and update metadata when needed.</p>
+        <div className="section-head">
+          <div>
+            <h2 className="section-title">My uploaded data</h2>
+            <p>Manage the data you have shared and update metadata when needed.</p>
+          </div>
+          <button className="btn btn-primary" onClick={() => navigate('/upload')}>
+            Upload data
+          </button>
+        </div>
       </div>
 
       <div className="card">
@@ -194,11 +201,11 @@ export default function MyData() {
                       </div>
                       <div className="kv-row">
                         <span className="subtle">Reference hint</span>
-                        <span>{item.ownerReferenceHint || '�'}</span>
+                        <span>{item.ownerReferenceHint || '-'}</span>
                       </div>
                       <div className="kv-row">
                         <span className="subtle">Identifier</span>
-                        <span>{item.ownerIdentifier || '�'}</span>
+                        <span>{item.ownerIdentifier || '-'}</span>
                       </div>
                       <div className="kv-row">
                         <span className="subtle">Download</span>
@@ -226,4 +233,5 @@ export default function MyData() {
     </div>
   );
 }
+
 

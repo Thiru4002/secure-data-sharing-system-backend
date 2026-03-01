@@ -76,7 +76,7 @@ export default function Approvals() {
         {loading ? (
           <p>Loading approvals...</p>
         ) : approvals.length === 0 ? (
-          <p>No approvals pending.</p>
+          <div className="empty-state">No approvals pending.</div>
         ) : (
           <div className="table-wrap">
             <table className="table">
@@ -95,7 +95,7 @@ export default function Approvals() {
                     <td>{item.serviceUser?.name || 'Unknown'}</td>
                     <td>{item.data?.title || 'Unknown'}</td>
                     <td>{item.purpose || '-'}</td>
-                    <td>{item.status}</td>
+                    <td><span className={`status-pill ${item.status}`}>{item.status}</span></td>
                     <td>
                       <div className="actions-row">
                         <button
