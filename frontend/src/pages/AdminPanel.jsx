@@ -27,6 +27,7 @@ export default function AdminPanel() {
   const [includeSuspended, setIncludeSuspended] = useState(true);
   const [consentFilter, setConsentFilter] = useState('all');
   const [reportFilter, setReportFilter] = useState('pending');
+  const [selectedReport, setSelectedReport] = useState(null);
   const [sectionOpen, setSectionOpen] = useState(() => {
     try {
       const raw = localStorage.getItem(ADMIN_SECTIONS_KEY);
@@ -123,10 +124,16 @@ export default function AdminPanel() {
   const reviewReport = async (id, payload) => {
     try {
       await api.patch(`/admin/reports/${id}/review`, payload);
+      setSelectedReport(null);
       await loadDashboard();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to review report');
     }
+  };
+
+  const shorten = (value, max = 60) => {
+    if (!value) return '-';
+    return value.length > max ? `${value.slice(0, max)}...` : value;
   };
 
   const usersSummary = useMemo(() => {
@@ -188,7 +195,6 @@ export default function AdminPanel() {
                   <option value="">All roles</option>
                   <option value="data_owner">Data owner</option>
                   <option value="service_user">Service user</option>
-                  <option value="admin">Admin</option>
                 </select>
               </div>
               <div className="form-group" style={{ alignContent: 'end' }}>
@@ -228,12 +234,16 @@ export default function AdminPanel() {
                     <td>{u.role}</td>
                     <td>{u.isDeleted ? 'Suspended' : 'Active'}</td>
                     <td>
-                      <button
-                        className={u.isDeleted ? 'btn btn-secondary' : 'btn btn-danger'}
-                        onClick={() => updateUser(u._id, { isDeleted: !u.isDeleted })}
-                      >
-                        {u.isDeleted ? 'Reactivate' : 'Suspend'}
-                      </button>
+                      {u.role === 'admin' ? (
+                        <span className="subtle">Protected</span>
+                      ) : (
+                        <button
+                          className={u.isDeleted ? 'btn btn-secondary' : 'btn btn-danger'}
+                          onClick={() => updateUser(u._id, { isDeleted: !u.isDeleted })}
+                        >
+                          {u.isDeleted ? 'Reactivate' : 'Suspend'}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -294,7 +304,7 @@ export default function AdminPanel() {
               <button className={reportFilter === 'validated' ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => setReportFilter('validated')}>Validated</button>
               <button className={reportFilter === 'rejected' ? 'btn btn-primary' : 'btn btn-secondary'} onClick={() => setReportFilter('rejected')}>Rejected</button>
             </div>
-            <div className="table-wrap"><table className="table">
+            <div className="table-wrap"><table className="table admin-report-table">
               <thead>
                 <tr>
                   <th>Reporter</th>
@@ -308,20 +318,20 @@ export default function AdminPanel() {
               <tbody>
                 {reports.slice(0, 20).map((r) => (
                   <tr key={r._id}>
-                    <td>{r.reporter?.email || r.reporter?.name || 'Unknown'}</td>
-                    <td>{r.reportedUser?.email || r.reportedUser?.name || 'Unknown'}</td>
+                    <td>{r.reporter?.name || 'Unknown'}</td>
+                    <td>{r.reportedUser?.name || 'Unknown'}</td>
                     <td>{r.category}</td>
-                    <td>{r.reason}</td>
-                    <td>{r.status}</td>
+                    <td className="report-reason-cell" title={r.reason}>{shorten(r.reason, 70)}</td>
+                    <td><span className={`status-pill ${r.status}`}>{r.status}</span></td>
                     <td>
-                      {r.status === 'pending' ? (
-                        <div style={{ display: 'flex', gap: 8 }}>
+                      <div className="actions-row">
+                        <button className="btn btn-secondary" onClick={() => setSelectedReport(r)}>View</button>
+                        {r.status === 'pending' ? (
                           <button className="btn btn-danger" onClick={() => reviewReport(r._id, { status: 'validated', suspendUser: true })}>Validate + Suspend</button>
-                          <button className="btn btn-secondary" onClick={() => reviewReport(r._id, { status: 'rejected' })}>Reject</button>
-                        </div>
-                      ) : (
-                        'Reviewed'
-                      )}
+                        ) : (
+                          <span className="subtle">Reviewed</span>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -382,6 +392,58 @@ export default function AdminPanel() {
           </table></div>
         )}
       </div>
+
+      {selectedReport && (
+        <div
+          className="report-modal-overlay"
+          onClick={() => setSelectedReport(null)}
+        >
+          <div
+            className="card report-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="section-head">
+              <h3 style={{ margin: 0 }}>Report details</h3>
+              <button className="btn btn-secondary" onClick={() => setSelectedReport(null)}>Close</button>
+            </div>
+
+            <div className="grid report-detail-grid">
+              <div className="kv-row"><span className="subtle">Reporter</span><span>{selectedReport.reporter?.email || selectedReport.reporter?.name || 'Unknown'}</span></div>
+              <div className="kv-row"><span className="subtle">Reported user</span><span>{selectedReport.reportedUser?.email || selectedReport.reportedUser?.name || 'Unknown'}</span></div>
+              <div className="kv-row"><span className="subtle">Category</span><span>{selectedReport.category}</span></div>
+              <div className="kv-row"><span className="subtle">Status</span><span><span className={`status-pill ${selectedReport.status}`}>{selectedReport.status}</span></span></div>
+              <div className="kv-row"><span className="subtle">Created</span><span>{selectedReport.createdAt ? new Date(selectedReport.createdAt).toLocaleString() : '-'}</span></div>
+            </div>
+
+            <div className="report-text-block">
+              <strong>Reason</strong>
+              <p>{selectedReport.reason || '-'}</p>
+            </div>
+
+            <div className="report-text-block">
+              <strong>Details</strong>
+              <p>{selectedReport.details || '-'}</p>
+            </div>
+
+            {selectedReport.status === 'pending' && (
+              <div className="actions-row report-detail-actions">
+                <button
+                  className="btn btn-danger"
+                  onClick={() => reviewReport(selectedReport._id, { status: 'validated', suspendUser: true })}
+                >
+                  Validate + Suspend
+                </button>
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => reviewReport(selectedReport._id, { status: 'rejected' })}
+                >
+                  Reject
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,9 @@
-﻿import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 export default function MyRequests() {
+  const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -40,6 +42,7 @@ export default function MyRequests() {
                   <th>Purpose</th>
                   <th>Status</th>
                   <th>Requested</th>
+                  <th>Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -52,6 +55,14 @@ export default function MyRequests() {
                       <td>{item.purpose || '-'}</td>
                       <td>{isDeleted ? 'deleted' : item.status}</td>
                       <td>{new Date(item.createdAt).toLocaleDateString()}</td>
+                      <td>
+                        <button
+                          className="btn btn-secondary"
+                          onClick={() => navigate(`/reports?reportedUserId=${encodeURIComponent(item.dataOwner?._id || '')}`)}
+                        >
+                          Report owner
+                        </button>
+                      </td>
                     </tr>
                   );
                 })}

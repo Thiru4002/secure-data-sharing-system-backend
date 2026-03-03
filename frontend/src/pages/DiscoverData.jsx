@@ -90,6 +90,12 @@ export default function DiscoverData() {
                   >
                     Open owner page
                   </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => navigate(`/reports?reportedUserId=${encodeURIComponent(owner.userId || owner.id)}`)}
+                  >
+                    Report user
+                  </button>
                 </div>
               </div>
             ))}

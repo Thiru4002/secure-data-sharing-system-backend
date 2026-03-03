@@ -104,6 +104,10 @@ exports.reviewReport = async (req, res) => {
     report.reviewedAt = new Date();
 
     if (status === 'validated' && suspendUser === true) {
+      const reportedUser = await User.findById(report.reportedUser).select('role');
+      if (reportedUser?.role === 'admin') {
+        return error(res, 400, 'Admin accounts cannot be suspended');
+      }
       await User.findByIdAndUpdate(report.reportedUser, { isDeleted: true });
       report.suspensionApplied = true;
     }

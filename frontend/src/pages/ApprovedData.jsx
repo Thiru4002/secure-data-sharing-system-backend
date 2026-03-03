@@ -146,9 +146,23 @@ export default function ApprovedData() {
                             >
                               {download.label}
                             </button>
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => navigate(`/reports?reportedUserId=${encodeURIComponent(item.dataOwner?._id || '')}`)}
+                            >
+                              Report owner
+                            </button>
                           </div>
                         ) : (
-                          <span className={`status-pill ${item.status}`}>{renderStatus(item.status)}</span>
+                          <div className="actions-row">
+                            <span className={`status-pill ${item.status}`}>{renderStatus(item.status)}</span>
+                            <button
+                              className="btn btn-secondary"
+                              onClick={() => navigate(`/reports?reportedUserId=${encodeURIComponent(item.dataOwner?._id || '')}`)}
+                            >
+                              Report owner
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>

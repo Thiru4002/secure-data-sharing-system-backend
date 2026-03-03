@@ -1,4 +1,5 @@
-﻿import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
 export default function ConsentHistory() {
@@ -147,19 +148,27 @@ export default function ConsentHistory() {
                       <td>{entry.approvedAt ? new Date(entry.approvedAt).toLocaleDateString() : '-'}</td>
                       <td>{entry.expiryDate ? new Date(entry.expiryDate).toLocaleDateString() : '-'}</td>
                       <td>
-                        {sharingNow ? (
-                          <button
-                            className="btn btn-danger"
-                            onClick={() => revokeConsent(entry._id)}
-                            disabled={actionLoadingById[entry._id]}
+                        <div className="actions-row">
+                          {sharingNow ? (
+                            <button
+                              className="btn btn-danger"
+                              onClick={() => revokeConsent(entry._id)}
+                              disabled={actionLoadingById[entry._id]}
+                            >
+                              {actionLoadingById[entry._id] ? 'Working...' : 'Revoke'}
+                            </button>
+                          ) : (
+                            <button className="btn btn-secondary" disabled>
+                              No action
+                            </button>
+                          )}
+                          <Link
+                            className="btn btn-secondary"
+                            to={`/reports?reportedUserId=${encodeURIComponent(entry.serviceUser?.userId || entry.serviceUser?._id || '')}`}
                           >
-                            {actionLoadingById[entry._id] ? 'Working...' : 'Revoke'}
-                          </button>
-                        ) : (
-                          <button className="btn btn-secondary" disabled>
-                            No action
-                          </button>
-                        )}
+                            Report user
+                          </Link>
+                        </div>
                         {actionMessageById[entry._id] && (
                           <div className="alert alert-success" style={{ marginTop: 10 }}>
                             {actionMessageById[entry._id]}
@@ -219,6 +228,12 @@ export default function ConsentHistory() {
                           No action
                         </button>
                       )}
+                      <Link
+                        className="btn btn-secondary"
+                        to={`/reports?reportedUserId=${encodeURIComponent(entry.serviceUser?.userId || entry.serviceUser?._id || '')}`}
+                      >
+                        Report user
+                      </Link>
                     </div>
                     {actionMessageById[entry._id] && (
                       <div className="alert alert-success">{actionMessageById[entry._id]}</div>
@@ -236,3 +251,4 @@ export default function ConsentHistory() {
     </div>
   );
 }
+

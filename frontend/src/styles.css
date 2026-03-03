@@ -384,6 +384,19 @@ a:focus-visible {
   color: #e2e8f0;
 }
 
+.card.dark label {
+  color: #cbd5e1;
+}
+
+.card.dark .subtle {
+  color: #94a3b8;
+}
+
+.card.dark input::placeholder,
+.card.dark textarea::placeholder {
+  color: #64748b;
+}
+
 .card .card {
   background: var(--panel-alt);
   box-shadow: none;
@@ -744,6 +757,66 @@ select option {
   flex-wrap: wrap;
 }
 
+.admin-report-table th:nth-child(4),
+.admin-report-table td:nth-child(4) {
+  min-width: 240px;
+}
+
+.report-reason-cell {
+  color: #1f2937;
+  line-height: 1.45;
+}
+
+.report-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(2, 6, 23, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1200;
+}
+
+.report-modal {
+  width: min(820px, 100%);
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.report-detail-grid {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.report-text-block {
+  margin-top: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: #f8fafc;
+}
+
+.report-text-block p {
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.report-modal .kv-row span:last-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.report-detail-actions {
+  margin-top: 16px;
+}
+
 .collapsible {
   max-height: 0;
   opacity: 0;
@@ -895,6 +968,10 @@ select option {
 
   .actions-row .btn {
     width: 100%;
+  }
+
+  .report-modal {
+    border-radius: 14px;
   }
 
   .btn {

@@ -61,6 +61,9 @@ exports.updateUserByAdmin = async (req, res) => {
     }
 
     if (typeof isDeleted === 'boolean') {
+      if (target.role === 'admin' && isDeleted === true) {
+        return error(res, 400, 'Admin accounts cannot be suspended');
+      }
       target.isDeleted = isDeleted;
     }
 

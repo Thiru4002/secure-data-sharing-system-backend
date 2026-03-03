@@ -189,6 +189,7 @@ export default function Dashboard({ user }) {
                 Granted consents
               </Link>
               <Link className="btn btn-secondary" to="/upload">Upload data</Link>
+              <Link className="btn btn-secondary" to="/reports">Report user</Link>
             </>
           )}
           {user.role === 'service_user' && (
@@ -199,6 +200,7 @@ export default function Dashboard({ user }) {
               <Link className="btn btn-secondary" to="/approved-data">
                 My consents
               </Link>
+              <Link className="btn btn-secondary" to="/reports">Report user</Link>
             </>
           )}
           {user.role === 'admin' && (

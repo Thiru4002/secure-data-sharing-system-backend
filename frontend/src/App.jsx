@@ -146,6 +146,7 @@ function AppShell({ user, onLogout }) {
         { to: '/dashboard', label: 'Dashboard', icon: 'DB' },
         { to: '/discover', label: 'Discover Owners', icon: 'DS' },
         { to: '/approved-data', label: 'Consents', icon: 'CT', badge: counts.serviceExpiringConsents },
+        { to: '/reports', label: 'Reports', icon: 'RP' },
         { to: '/profile', label: 'Profile', icon: 'PR' },
       ];
     }
@@ -156,6 +157,7 @@ function AppShell({ user, onLogout }) {
         { to: '/incoming-requests', label: 'Incoming Requests', icon: 'IR', badge: counts.ownerIncomingPending },
         { to: '/my-data', label: 'My Data', icon: 'MD' },
         { to: '/consent-history', label: 'Granted Consents', icon: 'GC', badge: counts.ownerExpiringGrants },
+        { to: '/reports', label: 'Reports', icon: 'RP' },
         { to: '/profile', label: 'Profile', icon: 'PR' },
       ];
     }
@@ -251,7 +253,10 @@ function AppShell({ user, onLogout }) {
         <Routes>
           <Route path="/dashboard" element={<Dashboard user={user} />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/reports" element={<Reports />} />
+          <Route
+            path="/reports"
+            element={['data_owner', 'service_user'].includes(user?.role) ? <Reports /> : <Navigate to="/dashboard" replace />}
+          />
           <Route path="/upload" element={<UploadData />} />
           <Route
             path="/discover"

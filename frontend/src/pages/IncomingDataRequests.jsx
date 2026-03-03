@@ -216,6 +216,12 @@ export default function IncomingDataRequests() {
                             ? 'Working...'
                             : 'Reject'}
                         </button>
+                        <Link
+                          className="btn btn-secondary"
+                          to={`/reports?reportedUserId=${encodeURIComponent(item.serviceUser?.userId || item.serviceUser?._id || '')}`}
+                        >
+                          Report user
+                        </Link>
                       </div>
                       {actionMessageById[item._id] && (
                         <div className="alert alert-success" style={{ marginTop: 10 }}>
@@ -325,6 +331,12 @@ export default function IncomingDataRequests() {
                               >
                                 {actionLoadingById[item._id] ? 'Working...' : 'Reject'}
                               </button>
+                              <Link
+                                className="btn btn-secondary"
+                                to={`/reports?reportedUserId=${encodeURIComponent(item.requester?.userId || item.requester?._id || '')}`}
+                              >
+                                Report user
+                              </Link>
                             </div>
                           </>
                         ) : (
