@@ -692,6 +692,7 @@ select option {
 }
 
 .hero {
+  position: relative;
   padding: 94px 12% 70px;
 }
 
@@ -713,6 +714,38 @@ select option {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.landing-server-badge {
+  position: absolute;
+  top: 24px;
+  right: 12%;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.landing-server-badge.waking {
+  color: #92400e;
+  border-color: rgba(245, 158, 11, 0.4);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.landing-server-badge.ready {
+  color: #065f46;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.landing-server-badge.error {
+  color: #991b1b;
+  border-color: rgba(220, 38, 38, 0.35);
+  background: rgba(220, 38, 38, 0.09);
 }
 
 .feature-grid {
@@ -933,6 +966,13 @@ select option {
 
   .hero {
     padding: 72px 8% 44px;
+  }
+
+  .landing-server-badge {
+    right: 8%;
+    top: 16px;
+    font-size: 11px;
+    padding: 5px 9px;
   }
 
   .feature-grid,

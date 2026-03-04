@@ -1,9 +1,63 @@
-﻿import { Link } from 'react-router-dom';
+﻿import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { API_ORIGIN } from '../api/axiosConfig';
 
 export default function Landing() {
+  const [backendStatus, setBackendStatus] = useState('checking');
+
+  useEffect(() => {
+    let active = true;
+    const abortController = new AbortController();
+
+    const warmingTimer = setTimeout(() => {
+      if (!active) return;
+      setBackendStatus((prev) => (prev === 'checking' ? 'waking' : prev));
+    }, 3500);
+
+    const requestTimer = setTimeout(() => {
+      abortController.abort();
+    }, 25000);
+
+    fetch(`${API_ORIGIN}/health`, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: abortController.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Health check failed');
+        return res.json();
+      })
+      .then(() => {
+        if (!active) return;
+        setBackendStatus('ready');
+      })
+      .catch(() => {
+        if (!active) return;
+        setBackendStatus('error');
+      })
+      .finally(() => {
+        clearTimeout(warmingTimer);
+        clearTimeout(requestTimer);
+      });
+
+    return () => {
+      active = false;
+      clearTimeout(warmingTimer);
+      clearTimeout(requestTimer);
+      abortController.abort();
+    };
+  }, []);
+
   return (
     <div>
       <section className="hero">
+        <div className={`landing-server-badge ${backendStatus}`}>
+          {backendStatus === 'checking' && 'Server: connecting'}
+          {backendStatus === 'waking' && 'Server: waking up'}
+          {backendStatus === 'ready' && 'Server: ready'}
+          {backendStatus === 'error' && 'Server: unreachable'}
+        </div>
+
         <div className="tag">Trusted data exchange</div>
         <h1>ClarityVault keeps consent, ownership, and access in one place.</h1>
         <p>
