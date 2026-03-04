@@ -4,57 +4,76 @@ import { API_ORIGIN } from '../api/axiosConfig';
 
 export default function Landing() {
   const [backendStatus, setBackendStatus] = useState('checking');
+  const [attemptCount, setAttemptCount] = useState(1);
 
   useEffect(() => {
     let active = true;
-    const abortController = new AbortController();
+    let retryTimer = null;
 
-    const warmingTimer = setTimeout(() => {
+    const fetchHealth = async (signal) => {
+      const healthUrls = [`${API_ORIGIN}/health`, `${API_ORIGIN}/api/health`];
+
+      for (const url of healthUrls) {
+        try {
+          const response = await fetch(url, {
+            method: 'GET',
+            cache: 'no-store',
+            signal,
+          });
+
+          if (response.ok) {
+            return true;
+          }
+        } catch {
+          // Try next endpoint.
+        }
+      }
+
+      return false;
+    };
+
+    const checkBackendHealth = async () => {
       if (!active) return;
-      setBackendStatus((prev) => (prev === 'checking' ? 'waking' : prev));
-    }, 3500);
 
-    const requestTimer = setTimeout(() => {
-      abortController.abort();
-    }, 25000);
+      const abortController = new AbortController();
+      const requestTimer = setTimeout(() => {
+        abortController.abort();
+      }, 12000);
 
-    fetch(`${API_ORIGIN}/health`, {
-      method: 'GET',
-      cache: 'no-store',
-      signal: abortController.signal,
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error('Health check failed');
-        return res.json();
-      })
-      .then(() => {
+      try {
+        const isHealthy = await fetchHealth(abortController.signal);
+        if (!isHealthy) {
+          throw new Error('Health check failed');
+        }
+
         if (!active) return;
         setBackendStatus('ready');
-      })
-      .catch(() => {
+      } catch {
         if (!active) return;
-        setBackendStatus('error');
-      })
-      .finally(() => {
-        clearTimeout(warmingTimer);
+        setBackendStatus('waking');
+        setAttemptCount((prev) => prev + 1);
+        retryTimer = setTimeout(checkBackendHealth, 2500);
+      } finally {
         clearTimeout(requestTimer);
-      });
+      }
+    };
+
+    checkBackendHealth();
 
     return () => {
       active = false;
-      clearTimeout(warmingTimer);
-      clearTimeout(requestTimer);
-      abortController.abort();
+      if (retryTimer) clearTimeout(retryTimer);
     };
   }, []);
 
-  if (backendStatus === 'checking' || backendStatus === 'waking') {
+  if (backendStatus !== 'ready') {
     return (
       <section className="wake-screen">
         <div className="wake-card">
           <div className="wake-spinner" aria-hidden="true" />
           <h2>Server is waking up</h2>
-          <p>Please wait a little bit. We will load the landing page automatically.</p>
+          <p>Please wait a little bit. We are retrying until the backend responds.</p>
+          <p className="wake-meta">Health check attempt: {attemptCount}</p>
         </div>
       </section>
     );
@@ -63,12 +82,7 @@ export default function Landing() {
   return (
     <div>
       <section className="hero">
-        <div className={`landing-server-badge ${backendStatus}`}>
-          {backendStatus === 'checking' && 'Server: connecting'}
-          {backendStatus === 'waking' && 'Server: waking up'}
-          {backendStatus === 'ready' && 'Server: ready'}
-          {backendStatus === 'error' && 'Server: unreachable'}
-        </div>
+        <div className={`landing-server-badge ${backendStatus}`}>Server: ready</div>
 
         <div className="tag">Trusted data exchange</div>
         <h1>ClarityVault keeps consent, ownership, and access in one place.</h1>
