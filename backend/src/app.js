@@ -21,10 +21,33 @@ const { logAction } = require('./middlewares/audit');
 
 const app = express();
 
+const normalizeOrigin = (value) => value.trim().replace(/\/+$/, '');
+const allowedOrigins = [
+  ...(process.env.FRONTEND_URL || '').split(','),
+  ...(process.env.FRONTEND_URLS || '').split(','),
+]
+  .map((origin) => origin.trim())
+  .filter(Boolean)
+  .map(normalizeOrigin);
+
+const defaultOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
+const corsOrigins = allowedOrigins.length > 0 ? allowedOrigins : defaultOrigins;
+
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    if (!origin) {
+      // Allow non-browser requests (curl, server-to-server, health checks).
+      return callback(null, true);
+    }
+    const normalizedOrigin = normalizeOrigin(origin);
+    if (corsOrigins.includes(normalizedOrigin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS blocked for origin: ${origin}`));
+  },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

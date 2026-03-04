@@ -48,6 +48,18 @@ export default function Landing() {
     };
   }, []);
 
+  if (backendStatus === 'checking' || backendStatus === 'waking') {
+    return (
+      <section className="wake-screen">
+        <div className="wake-card">
+          <div className="wake-spinner" aria-hidden="true" />
+          <h2>Server is waking up</h2>
+          <p>Please wait a little bit. We will load the landing page automatically.</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <div>
       <section className="hero">

@@ -691,6 +691,51 @@ select option {
   max-width: 430px;
 }
 
+.wake-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.wake-card {
+  width: min(520px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: var(--shadow-md);
+  padding: 30px 28px;
+  text-align: center;
+}
+
+.wake-card h2 {
+  margin: 0 0 10px;
+  font-size: clamp(24px, 4vw, 34px);
+  line-height: 1.15;
+}
+
+.wake-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+
+.wake-spinner {
+  width: 42px;
+  height: 42px;
+  margin: 0 auto 14px;
+  border-radius: 999px;
+  border: 3px solid rgba(29, 122, 192, 0.2);
+  border-top-color: var(--accent-2);
+  animation: wake-spin 0.95s linear infinite;
+}
+
+@keyframes wake-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .hero {
   position: relative;
   padding: 94px 12% 70px;
