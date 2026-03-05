@@ -27,6 +27,7 @@
 body {
   margin: 0;
   min-height: 100vh;
+  overflow-x: hidden;
   background:
     radial-gradient(circle at 8% 12%, rgba(29, 122, 192, 0.12), transparent 30%),
     radial-gradient(circle at 92% 90%, rgba(15, 76, 129, 0.1), transparent 34%),
@@ -62,6 +63,7 @@ img {
   position: sticky;
   top: 0;
   height: 100vh;
+  overflow-y: auto;
   background: rgba(10, 25, 47, 0.94);
   color: #d7e4f5;
   border-right: 1px solid rgba(148, 163, 184, 0.2);
@@ -190,6 +192,7 @@ img {
 
 .content {
   padding: 26px 30px 44px;
+  min-width: 0;
 }
 
 .topbar {
@@ -230,10 +233,10 @@ img {
 .mobile-menu-btn {
   display: none;
   position: fixed;
-  left: 12px;
-  top: 12px;
-  width: 42px;
-  height: 42px;
+  left: 14px;
+  top: max(12px, env(safe-area-inset-top));
+  width: 46px;
+  height: 46px;
   border-radius: 10px;
   border: 1px solid var(--line);
   background: #fff;
@@ -273,7 +276,7 @@ img {
 }
 
 .mobile-menu-btn.open span:nth-child(1) {
-  transform: rotate(45deg);
+  transform: translateY(0) rotate(45deg);
 }
 
 .mobile-menu-btn.open span:nth-child(2) {
@@ -281,7 +284,7 @@ img {
 }
 
 .mobile-menu-btn.open span:nth-child(3) {
-  transform: rotate(-45deg);
+  transform: translateY(0) rotate(-45deg);
 }
 
 .sidebar-overlay {
@@ -566,6 +569,7 @@ select option {
 .table-wrap {
   width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chip-row {
@@ -839,6 +843,7 @@ select option {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  align-items: stretch;
 }
 
 .admin-report-table th:nth-child(4),
@@ -991,11 +996,13 @@ select option {
 
   .content {
     padding: 14px 14px 28px;
-    margin-top: 52px;
+    margin-top: 64px;
+    min-width: 0;
   }
 
   .topbar {
     margin-bottom: 16px;
+    padding-left: 14px;
   }
 }
 
@@ -1037,10 +1044,16 @@ select option {
     align-items: flex-start;
   }
 
+  .topbar h1 {
+    font-size: 20px;
+  }
+
   .user-chip {
     width: 100%;
     justify-content: space-between;
     border-radius: 10px;
+    gap: 8px;
+    flex-wrap: wrap;
   }
 
   .card {
@@ -1057,8 +1070,27 @@ select option {
     gap: 4px;
   }
 
-  .actions-row .btn {
+  .actions-row {
     width: 100%;
+    gap: 6px;
+  }
+
+  .actions-row .btn {
+    width: auto;
+    flex: 1 1 132px;
+  }
+
+  .section-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .section-head .btn {
+    width: 100%;
+  }
+
+  .table {
+    min-width: 620px;
   }
 
   .report-modal {
@@ -1066,11 +1098,17 @@ select option {
   }
 
   .btn {
-    width: 100%;
+    width: auto;
+    min-height: 40px;
   }
 
   .hero-actions .btn {
     width: auto;
+  }
+
+  .form .btn,
+  .auth-card .btn {
+    width: 100%;
   }
 
   .desktop-only {
@@ -1079,5 +1117,89 @@ select option {
 
   .mobile-only {
     display: grid !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .content {
+    padding: 10px 10px 22px;
+    margin-top: 62px;
+  }
+
+  .topbar {
+    padding: 12px;
+    border-radius: 12px;
+  }
+
+  .topbar h1 {
+    font-size: 18px;
+  }
+
+  .topbar .subtle {
+    font-size: 13px;
+  }
+
+  .card {
+    padding: 14px;
+    border-radius: 12px;
+  }
+
+  .section-title {
+    font-size: 18px;
+  }
+
+  .stat strong {
+    font-size: 24px;
+  }
+
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  .table {
+    min-width: 560px;
+  }
+
+  .table th,
+  .table td {
+    padding: 9px 10px;
+    font-size: 12px;
+  }
+
+  .actions-row .btn {
+    flex: 1 1 100%;
+  }
+
+  .auth-card {
+    padding: 16px;
+  }
+
+  .wake-card {
+    padding: 20px 16px;
+  }
+
+  .wake-card h2 {
+    font-size: 26px;
+  }
+
+  .hero {
+    padding: 66px 6% 34px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .feature-grid,
+  .footer {
+    padding-left: 6%;
+    padding-right: 6%;
+  }
+
+  .owner-meta-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
 }

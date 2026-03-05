@@ -15,6 +15,7 @@ export default function ViewData({ user }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -47,14 +48,23 @@ export default function ViewData({ user }) {
     return <div className="card">No data found.</div>;
   }
 
+  const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+  const viewerName = user?.name || storedUser?.name || 'Authorized User';
   const canDownloadFile = data.allowDownload && data.dataType === 'file' && data.fileUrl;
   const canDownloadText = data.allowDownload && data.dataType === 'text' && data.content;
   const canViewFile = data.dataType === 'file' && data.fileUrl;
+  const fileNameLower = (data.fileName || '').toLowerCase();
+  const isPdfFile = fileNameLower.endsWith('.pdf') || (data.fileUrl || '').toLowerCase().includes('.pdf');
+  const baseUrl = api.defaults.baseURL || 'http://localhost:5000/api';
+  const token = localStorage.getItem('token');
+  const inlinePdfUrl = `${baseUrl}/data/${id}/view?token=${encodeURIComponent(token || '')}&disposition=inline#toolbar=0&navpanes=0&scrollbar=0`;
 
   const viewFile = () => {
-    const token = localStorage.getItem('token');
-    const baseUrl = api.defaults.baseURL || 'http://localhost:5000/api';
-    const url = `${baseUrl}/data/${id}/view?token=${encodeURIComponent(token || '')}`;
+    if (isPdfFile) {
+      setShowPdfViewer(true);
+      return;
+    }
+    const url = `${baseUrl}/data/${id}/view?token=${encodeURIComponent(token || '')}&disposition=inline`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -101,7 +111,7 @@ export default function ViewData({ user }) {
             <div className="actions-row">
               {canViewFile && (
                 <button className="btn btn-secondary" onClick={viewFile}>
-                  View file
+                  {isPdfFile ? 'View only' : 'View file'}
                 </button>
               )}
               {canDownloadFile && (
@@ -110,6 +120,16 @@ export default function ViewData({ user }) {
                 </button>
               )}
             </div>
+            {isPdfFile && showPdfViewer && (
+              <div className="pdf-view-container">
+                <iframe
+                  title="PDF Viewer"
+                  src={inlinePdfUrl}
+                  style={{ width: '100%', height: '78vh', border: '1px solid #d8deea', borderRadius: 10 }}
+                />
+                <div className="watermark">{`CONFIDENTIAL - ${viewerName}`}</div>
+              </div>
+            )}
             {data.content && (
               <div>
                 <p style={{ margin: 0, color: '#5b6475' }}>Attached note:</p>
@@ -160,6 +180,25 @@ export default function ViewData({ user }) {
           <p>Days remaining: {data.consentInfo.daysRemaining}</p>
         </div>
       )}
+
+      <style>{`
+        .pdf-view-container {
+          position: relative;
+        }
+
+        .watermark {
+          position: absolute;
+          top: 40%;
+          left: 20%;
+          transform: rotate(-30deg);
+          font-size: 40px;
+          color: rgba(255, 0, 0, 0.15);
+          pointer-events: none;
+          user-select: none;
+          z-index: 3;
+          white-space: nowrap;
+        }
+      `}</style>
     </div>
   );
 }

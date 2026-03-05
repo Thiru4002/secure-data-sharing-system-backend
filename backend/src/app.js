@@ -31,7 +31,7 @@ const allowedOrigins = [
   .map(normalizeOrigin);
 
 const defaultOrigins = ['http://localhost:3000', 'http://127.0.0.1:3000'];
-const corsOrigins = allowedOrigins.length > 0 ? allowedOrigins : defaultOrigins;
+const corsOrigins = Array.from(new Set([...defaultOrigins, ...allowedOrigins]));
 
 // Middleware
 app.use(cors({

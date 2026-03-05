@@ -62,9 +62,12 @@ Role restrictions are enforced in backend middleware and controller checks.
 - System monitoring and moderation actions
 
 ## API Base
-- Base URL: `http://localhost:5000/api`
-- Swagger UI: `http://localhost:5000/api-docs`
-- Health: `http://localhost:5000/health`
+- Base URL (Render): `https://secure-data-sharing-system.onrender.com/api`
+- Swagger UI (Render): `https://secure-data-sharing-system.onrender.com/api-docs`
+- Health (Render): `https://secure-data-sharing-system.onrender.com/health`
+- Base URL (Local): `http://localhost:5000/api`
+- Swagger UI (Local): `http://localhost:5000/api-docs`
+- Health (Local): `http://localhost:5000/health`
 
 ## Key Endpoints (High Level)
 

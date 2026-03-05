@@ -1,6 +1,6 @@
 ﻿import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { API_ORIGIN } from '../api/axiosConfig';
+import { HEALTH_CHECK_ORIGINS } from '../api/axiosConfig';
 
 export default function Landing() {
   const [backendStatus, setBackendStatus] = useState('checking');
@@ -11,7 +11,10 @@ export default function Landing() {
     let retryTimer = null;
 
     const fetchHealth = async (signal) => {
-      const healthUrls = [`${API_ORIGIN}/health`, `${API_ORIGIN}/api/health`];
+      const healthUrls = HEALTH_CHECK_ORIGINS.flatMap((origin) => [
+        `${origin}/health`,
+        `${origin}/api/health`,
+      ]);
 
       for (const url of healthUrls) {
         try {

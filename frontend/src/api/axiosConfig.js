@@ -1,7 +1,16 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://secure-data-sharing-system.onrender.com/api';
+const LOCAL_API_BASE_URL = 'http://localhost:5000/api';
+const RENDER_ORIGIN = 'https://secure-data-sharing-system.onrender.com/api';
+
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || LOCAL_API_BASE_URL;
 export const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '');
+export const HEALTH_CHECK_ORIGINS = Array.from(
+  new Set([
+    API_ORIGIN,
+    import.meta.env.VITE_HEALTH_CHECK_ORIGIN || RENDER_ORIGIN,
+  ])
+);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
