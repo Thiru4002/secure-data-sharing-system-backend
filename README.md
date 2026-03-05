@@ -62,7 +62,6 @@ Role restrictions are enforced in backend middleware and controller checks.
 - System monitoring and moderation actions
 
 ## API Base
-- Base URL (Render): `https://secure-data-sharing-system.onrender.com/api`
 - Swagger UI (Render): `https://secure-data-sharing-system.onrender.com/api-docs`
 - Health (Render): `https://secure-data-sharing-system.onrender.com/health`
 - Base URL (Local): `http://localhost:5000/api`
